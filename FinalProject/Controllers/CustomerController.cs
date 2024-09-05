@@ -6,6 +6,8 @@ using FinalProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace FinalProject.Controllers
@@ -27,13 +29,16 @@ namespace FinalProject.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Customer>>> GetAll()
         {
+            _logger.LogInformation("GET: Fetching all customers.");
             try
             {
                 var customers = await _customerRepository.GetCustomersAsync();
+                _logger.LogInformation("GET: Successfully retrieved {CustomerCount} customers.", customers.Count);
                 return Ok(customers);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "GET: An error occurred while fetching customers.");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -44,16 +49,25 @@ namespace FinalProject.Controllers
         {
             if (createCustomerDTO == null)
             {
+                _logger.LogWarning("POST: Received null customer DTO.");
                 return BadRequest("Customer is null.");
             }
 
+            _logger.LogInformation("POST: Creating a new customer.");
             try
             {
                 var customer = await _customerRepository.CreateCustomerAsync(createCustomerDTO);
+                _logger.LogInformation("POST: Successfully created customer with ID {CustomerId}.", customer.Id);
                 return CreatedAtAction(nameof(GetAll), new { id = customer.Id }, createCustomerDTO);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "POST: An error occurred while creating a customer.");
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -62,17 +76,26 @@ namespace FinalProject.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] CustomerDto updatedCustomerDTO)
         {
+            _logger.LogInformation("PUT: Updating customer with ID {CustomerId}.", id);
             try
             {
                 await _customerRepository.UpdateCustomerAsync(id, updatedCustomerDTO);
+                _logger.LogInformation("PUT: Successfully updated customer with ID {CustomerId}.", id);
                 return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogError(ex, ex.Message);
+                return NotFound(ex.Message);
             }
             catch (DbUpdateConcurrencyException ex)
             {
+                _logger.LogError(ex, "PUT: Concurrency error while updating customer with ID {CustomerId}.", id);
                 return StatusCode(500, $"Concurrency error: {ex.Message}");
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "PUT: An error occurred while updating customer with ID {CustomerId}.", id);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -81,13 +104,21 @@ namespace FinalProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id)
         {
+            _logger.LogInformation("DELETE: Deleting customer with ID {CustomerId}.", id);
             try
             {
                 await _customerRepository.DeleteCustomerAsync(id);
+                _logger.LogInformation("DELETE: Successfully deleted customer with ID {CustomerId}.", id);
                 return NoContent();
+            }
+            catch (KeyNotFoundException ex) 
+            {
+                _logger.LogError(ex, ex.Message, id);
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "DELETE: An error occurred while deleting customer with ID {CustomerId}.", id);
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }

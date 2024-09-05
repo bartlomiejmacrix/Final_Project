@@ -12,7 +12,6 @@ namespace FinalProject.Repositories
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
-        private readonly ILogger<CustomerController> _logger;
 
         public CustomerRepository(AppDbContext context, IMapper mapper)
         {
