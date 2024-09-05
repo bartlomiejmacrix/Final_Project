@@ -41,7 +41,7 @@ namespace FinalProject.Tests
         }
 
         [Fact]
-        public async Task GetAllAsync_ReturnsZeroCustomers_WhenNoCustomersInDatabase()
+        public async Task GetAllAsync_ReturnsEmptyList_WhenNoCustomersInDatabase()
         {
             // Arrange
             var customers = new List<Customer>();
@@ -72,7 +72,7 @@ namespace FinalProject.Tests
                 PostalCode = "12-345",
                 Town = "Springfield",
                 PhoneNumber = "+1-555-1234",
-                DateOfBirth = new DateTime(1985, 5, 15)
+                DateOfBirth = DateTime.SpecifyKind(new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc), DateTimeKind.Utc)
             };
             var customerFromResult = new Customer
             {
@@ -84,17 +84,17 @@ namespace FinalProject.Tests
                 PostalCode = "12-345",
                 Town = "Springfield",
                 PhoneNumber = "+1-555-1234",
-                DateOfBirth = new DateTime(1985, 5, 15)
+                DateOfBirth = DateTime.SpecifyKind(new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc), DateTimeKind.Utc)
             };
             A.CallTo(() => _customerRepository.CreateCustomerAsync(customerToAdd)).Returns(Task.FromResult(customerFromResult));
-       
+
             // Act
             var result = await _customerController.CreateAsync(customerToAdd);
 
             // Assert
             var okResult = result.Result as CreatedResult;
             okResult.Should().NotBeNull();
-            okResult.Value.Should().BeSameAs(customerFromResult);
+            okResult!.Value.Should().BeSameAs(customerFromResult);
         }
 
         [Fact]
@@ -109,7 +109,7 @@ namespace FinalProject.Tests
             // Assert
             var okResult = result.Result as BadRequestObjectResult;
             okResult.Should().NotBeNull();
-            okResult.Value.Should().Be("Customer is null.");
+            okResult!.Value.Should().Be("Customer is null.");
         }
 
         [Fact]
@@ -127,7 +127,7 @@ namespace FinalProject.Tests
                 PostalCode = "12-345",
                 Town = "Springfield",
                 PhoneNumber = "+1-555-1234",
-                DateOfBirth = new DateTime(1985, 5, 15)
+                DateOfBirth = DateTime.SpecifyKind(new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc), DateTimeKind.Utc)
             };
 
             A.CallTo(() => _customerRepository.UpdateCustomerAsync(customerId, oldCustomer)).Returns(Task.CompletedTask);
@@ -155,7 +155,7 @@ namespace FinalProject.Tests
                 PostalCode = "12-345",
                 Town = "Springfield",
                 PhoneNumber = "+1-555-1234",
-                DateOfBirth = new DateTime(1985, 5, 15)
+                DateOfBirth = DateTime.SpecifyKind(new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc), DateTimeKind.Utc)
             };
 
             A.CallTo(() => _customerRepository.UpdateCustomerAsync(customerId, oldCustomer))
@@ -167,7 +167,7 @@ namespace FinalProject.Tests
             // Assert
             var okResult = result as NotFoundObjectResult;
             okResult.Should().NotBeNull();
-            okResult.Value.Should().Be($"Customer with ID {customerId} not found.");
+            okResult!.Value.Should().Be($"Customer with ID {customerId} not found.");
         }
 
         [Fact]
@@ -178,10 +178,10 @@ namespace FinalProject.Tests
             A.CallTo(() => _customerRepository.DeleteCustomerAsync(customerId)).Returns(Task.CompletedTask);
 
             // Act
-            var result = _customerController.DeleteAsync(customerId);
+            var result = await _customerController.DeleteAsync(customerId);
 
             // Assert
-            var okResult = result.Result as NoContentResult;
+            var okResult = result as NoContentResult;
             okResult.Should().NotBeNull();
         }
 
@@ -200,15 +200,14 @@ namespace FinalProject.Tests
             // Assert
             var okResult = result as NotFoundObjectResult;
             okResult.Should().NotBeNull();
-            okResult.Value.Should().Be($"Customer with ID {customerId} not found.");
+            okResult!.Value.Should().Be($"Customer with ID {customerId} not found.");
         }
 
-        private List<Customer> GetSampleCustomersList()
+        private static List<Customer> GetSampleCustomersList()
         {
-            return new List<Customer>
-            {
-                new Customer
-                {
+            return
+            [
+                new() {
                     Id = Guid.NewGuid(),
                     FirstName = "John",
                     LastName = "Doe",
@@ -218,9 +217,9 @@ namespace FinalProject.Tests
                     PostalCode = "12-345",
                     Town = "Springfield",
                     PhoneNumber = "+1-555-1234",
-                    DateOfBirth = new DateTime(1985, 5, 15)
+                    DateOfBirth = DateTime.SpecifyKind(new DateTime(1985, 5, 15, 0, 0, 0, DateTimeKind.Utc), DateTimeKind.Utc)
                 },
-                new Customer
+                new()
                 {
                     Id = Guid.NewGuid(),
                     FirstName = "Jane",
@@ -231,10 +230,9 @@ namespace FinalProject.Tests
                     PostalCode = "67-890",
                     Town = "Shelbyville",
                     PhoneNumber = "+1-555-5678",
-                    DateOfBirth = new DateTime(1990, 8, 25)
+                    DateOfBirth = DateTime.SpecifyKind(new DateTime(1990, 8, 25, 0, 0, 0, DateTimeKind.Utc), DateTimeKind.Utc)
                 }
-            };
+            ];
         }
-
     }
 }

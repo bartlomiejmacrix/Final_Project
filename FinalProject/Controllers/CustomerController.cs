@@ -1,13 +1,8 @@
-﻿using AutoMapper;
-using FinalProject.Contracts;
+﻿using FinalProject.Contracts;
 using FinalProject.DTOs;
 using FinalProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace FinalProject.Controllers
 {
@@ -16,43 +11,33 @@ namespace FinalProject.Controllers
     /// </summary>
     [Route("api/[controller]")]
     [ApiController]
-    public class CustomerController : ControllerBase
+    public class CustomerController(ICustomerRepository customerRepository, ILogger<CustomerController> logger) : ControllerBase
     {
-        private readonly ICustomerRepository _customerRepository;
-        private readonly ILogger<CustomerController> _logger;
-
-        public CustomerController(ICustomerRepository customerRepository, ILogger<CustomerController> logger)
-        {
-            _customerRepository = customerRepository;
-            _logger = logger;
-        }
+        private readonly ICustomerRepository _customerRepository = customerRepository;
+        private readonly ILogger<CustomerController> _logger = logger;
 
         /// <summary>
         /// Retrieves all customers from the database.
         /// </summary>
         /// <response code="200">Returns the list of customers</response>
         /// <response code="500">If there was an internal server error</response>
-        /// <response code="204">If no customers were found</response>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<ActionResult<IEnumerable<Customer>>> GetAllAsync()
         {
             _logger.LogInformation("GET: Fetching all customers.");
             try
             {
                 var customers = await _customerRepository.GetCustomersAsync();
-                if (customers.Count == 0)
-                {
-                    return NoContent();
-                }
                 _logger.LogInformation("GET: Successfully retrieved {CustomerCount} customers.", customers.Count);
+
                 return Ok(customers);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "GET: An error occurred while fetching customers.");
+
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -72,6 +57,7 @@ namespace FinalProject.Controllers
             if (createCustomerDTO == null)
             {
                 _logger.LogWarning("POST: Received null customer DTO.");
+
                 return BadRequest("Customer is null.");
             }
 
@@ -80,11 +66,13 @@ namespace FinalProject.Controllers
             {
                 var customer = await _customerRepository.CreateCustomerAsync(createCustomerDTO);
                 _logger.LogInformation("POST: Successfully created customer with ID {CustomerId}.", customer.Id);
+
                 return Created($"/api/customer/{customer.Id}", customer);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "POST: An error occurred while creating a customer.");
+
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -106,21 +94,25 @@ namespace FinalProject.Controllers
             {
                 await _customerRepository.UpdateCustomerAsync(id, updatedCustomerDTO);
                 _logger.LogInformation("PUT: Successfully updated customer with ID {CustomerId}.", id);
+
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogError(ex, ex.Message);
+                _logger.LogError(ex, "An error occurred: {Message}", ex.Message);
+
                 return NotFound(ex.Message);
             }
             catch (DbUpdateConcurrencyException ex)
             {
                 _logger.LogError(ex, "PUT: Concurrency error while updating customer with ID {CustomerId}.", id);
+
                 return StatusCode(500, $"Concurrency error: {ex.Message}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "PUT: An error occurred while updating customer with ID {CustomerId}.", id);
+
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
@@ -142,16 +134,19 @@ namespace FinalProject.Controllers
             {
                 await _customerRepository.DeleteCustomerAsync(id);
                 _logger.LogInformation("DELETE: Successfully deleted customer with ID {CustomerId}.", id);
+
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogError(ex, ex.Message, id);
+                _logger.LogError(ex, "An error occurred: {Message} Id: {Id}", ex.Message, id);
+
                 return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "DELETE: An error occurred while deleting customer with ID {CustomerId}.", id);
+
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }

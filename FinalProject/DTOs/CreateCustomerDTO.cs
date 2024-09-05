@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace FinalProject.DTOs
 {
@@ -50,7 +49,7 @@ namespace FinalProject.DTOs
             return age;
         }
 
-        public static ValidationResult? ValidateDateOfBirth(DateTime dateOfBirth, ValidationContext context)
+        public static ValidationResult? ValidateDateOfBirth(DateTime dateOfBirth)
         {
             if (dateOfBirth >= DateTime.Now)
             {

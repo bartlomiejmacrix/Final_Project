@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using FinalProject.Contracts;
-using FinalProject.Controllers;
 using FinalProject.Data;
 using FinalProject.DTOs;
 using FinalProject.Models;
@@ -8,16 +7,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FinalProject.Repositories
 {
-    public class CustomerRepository : ICustomerRepository
+    public class CustomerRepository(AppDbContext context, IMapper mapper) : ICustomerRepository
     {
-        private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly AppDbContext _context = context;
+        private readonly IMapper _mapper = mapper;
 
-        public CustomerRepository(AppDbContext context, IMapper mapper)
-        {
-            _context = context;
-            _mapper = mapper;
-        }
         public async Task<Customer> CreateCustomerAsync(CustomerDto customerDTO)
         {
             var customer = _mapper.Map<Customer>(customerDTO);
@@ -34,12 +28,7 @@ namespace FinalProject.Repositories
 
         public async Task DeleteCustomerAsync(Guid id)
         {
-            var customer = await _context.Customers.FindAsync(id);
-            if (customer == null)
-            {
-                throw new KeyNotFoundException($"Customer with ID {id} not found.");
-            }
-
+            var customer = await _context.Customers.FindAsync(id) ?? throw new KeyNotFoundException($"Customer with ID {id} not found.");
             _context.Customers.Remove(customer);
             await _context.SaveChangesAsync();
         }
