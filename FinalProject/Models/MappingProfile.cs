@@ -7,7 +7,7 @@ namespace FinalProject.Models
     {
         public MappingProfile()
         {
-            CreateMap<CustomerDTO, Customer>()
+            CreateMap<CustomerDto, Customer>()
                 .ForMember(dest => dest.DateOfBirth, opt => opt
                 .MapFrom(src => DateTime.SpecifyKind(src.DateOfBirth, DateTimeKind.Utc)))
                 .ReverseMap();

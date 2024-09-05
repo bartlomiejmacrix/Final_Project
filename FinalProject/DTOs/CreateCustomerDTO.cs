@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace FinalProject.DTOs
 {
-    public class CustomerDTO
+    public class CustomerDto
     {
         [Required(ErrorMessage = "First name is required.")]
         [StringLength(50, MinimumLength = 2, ErrorMessage = "First name must be between 2 and 50 characters.")]
@@ -38,7 +38,7 @@ namespace FinalProject.DTOs
 
         [Required(ErrorMessage = "Date of birth is required.")]
         [DataType(DataType.Date)]
-        [CustomValidation(typeof(CustomerDTO), "ValidateDateOfBirth")]
+        [CustomValidation(typeof(CustomerDto), "ValidateDateOfBirth")]
         public DateTime DateOfBirth { get; set; }
 
         public static ValidationResult? ValidateDateOfBirth(DateTime dateOfBirth, ValidationContext context)

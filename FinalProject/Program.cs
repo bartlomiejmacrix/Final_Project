@@ -1,4 +1,6 @@
+using FinalProject.Contracts;
 using FinalProject.Data;
+using FinalProject.Repositories;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -15,6 +17,8 @@ builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 
 var app = builder.Build();
 
