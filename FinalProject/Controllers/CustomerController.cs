@@ -1,17 +1,19 @@
 ﻿using AutoMapper;
 using FinalProject.Contracts;
-using FinalProject.Data;
 using FinalProject.DTOs;
 using FinalProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace FinalProject.Controllers
 {
+    /// <summary>
+    /// Handles customer-related actions such as retrieving, creating, updating, and deleting customers.
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
@@ -25,14 +27,26 @@ namespace FinalProject.Controllers
             _logger = logger;
         }
 
-        // GET: api/Customer
+        /// <summary>
+        /// Retrieves all customers from the database.
+        /// </summary>
+        /// <response code="200">Returns the list of customers</response>
+        /// <response code="500">If there was an internal server error</response>
+        /// <response code="204">If no customers were found</response>
         [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         public async Task<ActionResult<IEnumerable<Customer>>> GetAllAsync()
         {
             _logger.LogInformation("GET: Fetching all customers.");
             try
             {
                 var customers = await _customerRepository.GetCustomersAsync();
+                if (customers.Count == 0)
+                {
+                    return NoContent();
+                }
                 _logger.LogInformation("GET: Successfully retrieved {CustomerCount} customers.", customers.Count);
                 return Ok(customers);
             }
@@ -43,8 +57,16 @@ namespace FinalProject.Controllers
             }
         }
 
-        // POST: api/Customer
+        /// <summary>
+        /// Creates a new customer in the database.
+        /// </summary>
+        /// <response code="201">Customer successfully created</response>
+        /// <response code="400">If the provided customer data is null or invalid</response>
+        /// <response code="500">If there was an internal server error</response>
         [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Customer>> CreateAsync([FromBody] CustomerDto createCustomerDTO)
         {
             if (createCustomerDTO == null)
@@ -58,7 +80,7 @@ namespace FinalProject.Controllers
             {
                 var customer = await _customerRepository.CreateCustomerAsync(createCustomerDTO);
                 _logger.LogInformation("POST: Successfully created customer with ID {CustomerId}.", customer.Id);
-                return CreatedAtAction(nameof(GetAllAsync), new { id = customer.Id }, createCustomerDTO);
+                return Created($"/api/customer/{customer.Id}", customer);
             }
             catch (Exception ex)
             {
@@ -67,8 +89,16 @@ namespace FinalProject.Controllers
             }
         }
 
-        // PUT: api/Customer/{id}
+        /// <summary>
+        /// Updates an existing customer with the provided data.
+        /// </summary>
+        /// <response code="204">Customer successfully updated</response>
+        /// <response code="404">If the customer was not found</response>
+        /// <response code="500">If there was an internal server error or concurrency issue</response>
         [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] CustomerDto updatedCustomerDTO)
         {
             _logger.LogInformation("PUT: Updating customer with ID {CustomerId}.", id);
@@ -95,8 +125,16 @@ namespace FinalProject.Controllers
             }
         }
 
-        // DELETE: api/Customer/{id}
+        /// <summary>
+        /// Deletes a customer by ID.
+        /// </summary>
+        /// <response code="204">Customer successfully deleted</response>
+        /// <response code="404">If the customer was not found</response>
+        /// <response code="500">If there was an internal server error</response>
         [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteAsync(Guid id)
         {
             _logger.LogInformation("DELETE: Deleting customer with ID {CustomerId}.", id);
@@ -106,7 +144,7 @@ namespace FinalProject.Controllers
                 _logger.LogInformation("DELETE: Successfully deleted customer with ID {CustomerId}.", id);
                 return NoContent();
             }
-            catch (KeyNotFoundException ex) 
+            catch (KeyNotFoundException ex)
             {
                 _logger.LogError(ex, ex.Message, id);
                 return NotFound(ex.Message);

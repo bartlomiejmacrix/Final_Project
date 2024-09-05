@@ -92,9 +92,9 @@ namespace FinalProject.Tests
             var result = await _customerController.CreateAsync(customerToAdd);
 
             // Assert
-            var okResult = result.Result as CreatedAtActionResult;
+            var okResult = result.Result as CreatedResult;
             okResult.Should().NotBeNull();
-            okResult.Value.Should().BeSameAs(customerToAdd);
+            okResult.Value.Should().BeSameAs(customerFromResult);
         }
 
         [Fact]
