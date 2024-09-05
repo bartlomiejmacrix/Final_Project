@@ -41,6 +41,15 @@ namespace FinalProject.DTOs
         [CustomValidation(typeof(CustomerDto), "ValidateDateOfBirth")]
         public DateTime DateOfBirth { get; set; }
 
+        public int Age => CalculateAge();
+        private int CalculateAge()
+        {
+            var today = DateTime.Today;
+            var age = today.Year - DateOfBirth.Year;
+            if (DateOfBirth.Date > today.AddYears(-age)) age--;
+            return age;
+        }
+
         public static ValidationResult? ValidateDateOfBirth(DateTime dateOfBirth, ValidationContext context)
         {
             if (dateOfBirth >= DateTime.Now)

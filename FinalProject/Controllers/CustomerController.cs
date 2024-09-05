@@ -60,11 +60,6 @@ namespace FinalProject.Controllers
                 _logger.LogInformation("POST: Successfully created customer with ID {CustomerId}.", customer.Id);
                 return CreatedAtAction(nameof(GetAllAsync), new { id = customer.Id }, createCustomerDTO);
             }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogError(ex, ex.Message);
-                return NotFound(ex.Message);
-            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "POST: An error occurred while creating a customer.");
