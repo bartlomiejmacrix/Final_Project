@@ -27,7 +27,7 @@ namespace FinalProject.Controllers
 
         // GET: api/Customer
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetAll()
+        public async Task<ActionResult<IEnumerable<Customer>>> GetAllAsync()
         {
             _logger.LogInformation("GET: Fetching all customers.");
             try
@@ -45,7 +45,7 @@ namespace FinalProject.Controllers
 
         // POST: api/Customer
         [HttpPost]
-        public async Task<ActionResult<Customer>> Create([FromBody] CustomerDto createCustomerDTO)
+        public async Task<ActionResult<Customer>> CreateAsync([FromBody] CustomerDto createCustomerDTO)
         {
             if (createCustomerDTO == null)
             {
@@ -58,7 +58,7 @@ namespace FinalProject.Controllers
             {
                 var customer = await _customerRepository.CreateCustomerAsync(createCustomerDTO);
                 _logger.LogInformation("POST: Successfully created customer with ID {CustomerId}.", customer.Id);
-                return CreatedAtAction(nameof(GetAll), new { id = customer.Id }, createCustomerDTO);
+                return CreatedAtAction(nameof(GetAllAsync), new { id = customer.Id }, createCustomerDTO);
             }
             catch (KeyNotFoundException ex)
             {
@@ -74,7 +74,7 @@ namespace FinalProject.Controllers
 
         // PUT: api/Customer/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(Guid id, [FromBody] CustomerDto updatedCustomerDTO)
+        public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] CustomerDto updatedCustomerDTO)
         {
             _logger.LogInformation("PUT: Updating customer with ID {CustomerId}.", id);
             try
@@ -102,7 +102,7 @@ namespace FinalProject.Controllers
 
         // DELETE: api/Customer/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(Guid id)
+        public async Task<IActionResult> DeleteAsync(Guid id)
         {
             _logger.LogInformation("DELETE: Deleting customer with ID {CustomerId}.", id);
             try
