@@ -14,6 +14,7 @@
         public string PhoneNumber { get; set; } = string.Empty;
         public DateTime DateOfBirth { get; set; }
         public int Age => CalculateAge();
+        public byte[]? Image { get; set; }
 
         private int CalculateAge()
         {

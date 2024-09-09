@@ -40,6 +40,9 @@ namespace FinalProject.DTOs
         [CustomValidation(typeof(CustomerDto), "ValidateDateOfBirth")]
         public DateTime DateOfBirth { get; set; }
 
+        [CustomValidation(typeof(CustomerDto), "ValidateImageSize")]
+        public byte[]? Image { get; set; }
+
         public int Age => CalculateAge();
         private int CalculateAge()
         {
@@ -54,6 +57,15 @@ namespace FinalProject.DTOs
             if (dateOfBirth >= DateTime.Now)
             {
                 return new ValidationResult("Date of birth must be in the past.");
+            }
+            return ValidationResult.Success;
+        }
+
+        public static ValidationResult? ValidateImageSize(byte[]? image, ValidationContext context)
+        {
+            if (image != null && image.Length > 5 * 1024 * 1024)
+            {
+                return new ValidationResult("Image size cannot exceed 5 MB.");
             }
             return ValidationResult.Success;
         }
