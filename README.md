@@ -19,7 +19,7 @@ To run this project locally, follow these steps:
 2. Navigate to the project directory:
 
     ```bash
-    cd Final_Project
+    cd .\Final_Project\FinalProject
     ```
 
 3. Install dependencies:
